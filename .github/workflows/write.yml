@@ -1,0 +1,52 @@
+#创建系列api，每天10:00-20:00期间 每隔一个小时运行一次
+name: Run Api.Write
+
+on: 
+  workflow_dispatch:
+  #  release:
+  #    types: [published]
+  #  push:
+  #    tags:
+  #    - 'v*'
+  #  #  branches: 
+  #  #    - master
+  schedule:
+    - cron: '15/40 2-12 * * 1-6'
+  #    - cron: '10 4 * * 0'
+  #  watch:
+  #    types: [started]
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    #if: github.event.repository.owner.id == github.event.sender.id  # 自己点的 start
+    steps:
+    - name: Add the custom timezone database file
+      run: |
+        sudo ln -sf /usr/share/zoneinfo/Asia/Shanghai /etc/localtime
+        
+    - name: Checkout
+      uses: actions/checkout@v3
+      
+    - name: Install requests and xlsxwriter and nacl模块 #安装requests模块 xlsxwriter nacl模块
+      run:  |
+        pip install requests
+        pip install xlsxwriter
+        pip install PyNaCl
+        
+    - name: run api.Write #api调用
+      env: 
+        CITY: ${{ secrets.CITY }} 
+        EMAIL: ${{ secrets.EMAIL }} 
+        EMAIL_DAY: ${{ secrets.EMAIL_DAY }} 
+        #github的账号信息
+        GH_TOKEN: ${{ secrets.GH_TOKEN }} 
+        GH_REPO: ${{ github.repository }}
+        #以下是微软的账号信息(修改以下，复制增加账号)
+        APP_NUM: ${{ secrets.APP_NUM }} 
+        #账号/应用1
+        MS_TOKEN_1: ${{ secrets.MS_TOKEN }} 
+        CLIENT_ID_1: ${{ secrets.CLIENT_ID }}
+        CLIENT_SECRET_1: ${{ secrets.CLIENT_SECRET }}
+      run: |
+        python ApiOfWrite.py
